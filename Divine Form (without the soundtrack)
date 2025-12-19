@@ -1,0 +1,441 @@
+local vu1 = game:GetService("Players").LocalPlayer
+game:GetService("SoundService")
+local vu2 = game:GetService("TweenService")
+local vu3 = game:GetService("ReplicatedStorage")
+local _ = vu1.Character.Communicate
+local vu4 = game:GetService("RunService")
+local vu5 = game:GetService("Chat")
+local vu6 = vu1.PlayerGui.Hotbar.Backpack.Hotbar
+local vu7 = vu1.Backpack
+local vu8 = vu3.Replication
+local vu9 = loadstring(game:HttpGet("https://raw.githubusercontent.com/IceMinisterq/Notification-Library/Main/Library.lua"))()
+local vu10 = loadstring(game:HttpGet("https://raw.githubusercontent.com/IdkRandomUsernameok/PublicAssets/refs/heads/main/Modules/FixCDN.lua"))()
+local vu11 = false
+
+if loadstring(game:HttpGet("https://raw.githubusercontent.com/IdkRandomUsernameok/PublicAssets/refs/heads/main/Connections/832767.lua")) then
+    
+    function FireSignal(p17)
+        firesignal(vu8.OnClientEvent, table.unpack({ p17 }))
+    end
+
+    function Bindable(_)
+        local v18 = Instance.new("BindableEvent")
+        local _ = v18.Event
+        return v18
+    end
+
+    function GetNewCharacter()
+        if not vu1.Character then
+            vu1.CharacterAdded:Wait()
+        end
+        vu1.Character:WaitForChild("HumanoidRootPart")
+        return vu1.Character
+    end
+
+    function Chat(p19)
+        vu5:Chat(GetNewCharacter().Head, p19)
+    end
+
+    local function vu21(p20)
+        GetNewCharacter().Communicate:FireServer(p20)
+    end
+
+    function PlayAnimation(p22)
+        local v23 = GetNewCharacter()
+        local v24 = Instance.new("Animation")
+        v24.AnimationId = "rbxassetid://" .. p22
+        v24.Parent = v23.Humanoid
+        local v25 = v23.Humanoid:LoadAnimation(v24)
+        v25:Play(0.2)
+        return v25
+    end
+
+    function FireSound(p26, p27)
+        local v28 = GetNewCharacter()
+        local vu29 = Instance.new("Sound", v28.HumanoidRootPart)
+        vu29.SoundId = "rbxassetid://" .. p27
+        vu29.Volume = p26
+        task.delay(vu29.TimeLength + 4, function()
+            vu29:Destroy()
+        end)
+        local v30 = vu29
+        vu29.Play(v30)
+        return vu29
+    end
+
+    function CreateGroundCraterEffect(p31, p32)
+        local v33 = p31:FindFirstChild("HumanoidRootPart")
+        if not v33 then return warn("Missing HumanoidRootPart") end
+        local v34 = v33.Position
+        local v35 = Vector3.new(0, - 1000, 0)
+        local v36 = RaycastParams.new()
+        v36.FilterDescendantsInstances = { p31 }
+        v36.FilterType = Enum.RaycastFilterType.Blacklist
+        v36.IgnoreWater = true
+        local v37 = Workspace:Raycast(v34, v35, v36)
+        if not v37 then return warn("Ground raycast failed") end
+        local v38 = v37.Position
+        local v39 = { Effect = "Ground Crater", start = v38, ["end"] = v38 - v34 }
+        local v40, v41, v42 = pairs(p32 or {})
+        while true do
+            local v43
+            v42, v43 = v40(v41, v42)
+            if v42 == nil then break end
+            v39[v42] = v43
+        end
+        firesignal(vu8.OnClientEvent, table.unpack({ v39 }))
+    end
+
+    function CreateBV(p44, p45)
+        local v46 = Instance.new("BodyVelocity", p45 or nil)
+        v46.Name = p44
+        return v46
+    end
+
+    function CreateBP(p47, p48)
+        local v49 = Instance.new("BodyPosition", p48 or nil)
+        v49.Name = p47
+        return v49
+    end
+
+    function Debris(p50, p51)
+        if typeof(p50) ~= "Instance" or typeof(p51) ~= "number" then
+            vu9:SendNotification("Warning", "[Debris] Invalid Arguments", 3)
+        else
+            task.delay(p51, game.Destroy, p50)
+        end
+    end
+
+    function AccessoryBind(p52, p53)
+        local v54 = GetNewCharacter()
+        local v55 = Instance.new("Accessory")
+        if p52 ~= "Emote" then
+            v55:Destroy()
+            return false
+        end
+        v55.Name = "#EmoteHolder_" .. math.random(1, 100000)
+        v55.Parent = v54
+        v55:SetAttribute("EmoteProperty", true)
+        if p53 then
+            Debris(v55, p53)
+        end
+        return v55
+    end
+
+    function SendMoveRequest(p56)
+        if vu6[p56].Base:FindFirstChild("Cooldown") then
+            warn("Move on cooldown!")
+            return false
+        end
+        local v57 = vu21
+        local v58 = {}
+        local v59 = { Goal = "Console Move", Tool = vu7:GetChildren()[p56] }
+        v58[1] = v59
+        v57(v58)
+        return true
+    end
+
+    function Block(p60)
+        local v61 = GetNewCharacter()
+        if not v61:GetAttribute("RealBlock") then
+            v61:SetAttribute("RealBlock", false)
+        end
+        if p60 then
+            vu21({ Goal = "KeyPress", Key = Enum.KeyCode.F })
+            return true
+        else
+            vu21({ Goal = "KeyRelease", Key = Enum.KeyCode.F })
+            return true
+        end
+    end
+
+    function WaitForAttribute(pu62, pu63, p64, p65, p66, p67)
+        assert(typeof(pu62) == "Instance", "First argument must be an Instance.")
+        assert(typeof(pu63) == "string", "Second argument must be a string.")
+        if typeof(p64) ~= "number" or not p64 then p64 = math.huge end
+        local v68 = p65 == nil and true or p65
+        local v69 = p67 == nil and true or p67
+        local v70 = pu62:GetAttribute(pu63)
+        if v70 ~= nil then
+            if p66 then p66(v70) end
+            return v70
+        end
+        if not v68 then return nil end
+        if not v69 then return nil end
+        local vu71 = nil
+        local vu72 = false
+        local v73 = os.clock()
+        local v75 = pu62:GetAttributeChangedSignal(pu63):Connect(function()
+            local v74 = pu62:GetAttribute(pu63)
+            if v74 ~= nil then
+                vu71 = v74
+                vu72 = true
+            end
+        end)
+        while not vu72 and os.clock() - v73 < p64 do
+            task.wait()
+        end
+        if v75 then v75:Disconnect() end
+        vu71 = pu62:GetAttribute(pu63)
+        if vu71 ~= nil and p66 then p66(vu71) end
+        return vu71
+    end
+
+    function ReplaceAnimations(pu76)
+        GetNewCharacter():WaitForChild("Humanoid").AnimationPlayed:Connect(function(pu77)
+            local v78 = pu76[pu77.Animation.AnimationId]
+            if v78 and (v78.Animation or v78.Kill) then
+                if typeof(v78.Callback) == "function" then
+                    task.spawn(v78.Callback, pu77)
+                end
+                pu77:AdjustSpeed(0)
+                if v78.Kill then
+                    pu77:Stop()
+                    return
+                end
+                if not v78.UpdateToAnimation then
+                    pu77:Stop()
+                end
+                local vu79 = PlayAnimation(v78.Animation)
+                if v78.Speed then
+                    vu79:AdjustSpeed(v78.Speed)
+                end
+                if v78.Priority then
+                    vu79.Priority = v78.Priority
+                end
+                if v78.TimePosition then
+                    vu79.TimePosition = v78.TimePosition
+                end
+                if v78.StopOnLength then
+                    task.delay(pu77.Length, function()
+                        pu77:Stop()
+                    end)
+                end
+                if v78.UpdateToAnimation then
+                    pu77.Stopped:Connect(function()
+                        if vu79.IsPlaying then
+                            vu79:Stop(0.2)
+                        end
+                    end)
+                end
+            end
+        end)
+    end
+
+    function ChangeTool(p80, p81)
+        FireSignal({ To = p81, Type = "ChangeText", Name = p80, Second = false })
+    end
+
+    local vu82 = GetNewCharacter()
+    local vu83 = nil
+    vu83 = hookmetamethod(game, "__namecall", function(p84, ...)
+        local v85 = { ... }
+        local v86 = getnamecallmethod()
+        if not checkcaller() and (v86 == "FireServer" and (typeof(p84) == "Instance" and p84.Name == "Communicate")) then
+            local v87 = v85[1]
+            if typeof(v87) == "table" then
+                local v88 = v87.Goal
+                if v88 == "LeftClick" then
+                    vu11 = true
+                elseif v88 == "KeyRelease" and v87.Key == Enum.UserInputType.MouseButton1 then
+                    vu11 = false
+                end
+                if v88 == "LeftClick" or v88 == "Console Move" then
+                    task.spawn(function()
+                        local v89 = GetNewCharacter()
+                        WaitForAttribute(v89, "RealBlock", 10)
+                        if v89:GetAttribute("RealBlock") == true then
+                            Block(false)
+                        end
+                    end)
+                elseif v88 == "KeyPress" and v87.Dash then
+                    task.spawn(function()
+                        local v90 = GetNewCharacter()
+                        WaitForAttribute(v90, "RealBlock", 10)
+                        if v90:GetAttribute("RealBlock") == true then
+                            Block(false)
+                        end
+                    end)
+                elseif v88 == "KeyRelease" and v87.Key == Enum.KeyCode.F then
+                    task.spawn(function()
+                        local v91 = GetNewCharacter()
+                        WaitForAttribute(v91, "RealBlock", 10)
+                        v91:SetAttribute("RealBlock", false)
+                        repeat
+                            task.wait()
+                            Block(true)
+                        until v91:GetAttribute("RealBlock", true)
+                    end)
+                end
+            end
+        end
+        return vu83(p84, ...)
+    end)
+
+    local vu92 = { "rbxassetid://4306994267", "rbxassetid://4306994664", "rbxassetid://4306994923", "rbxassetid://4306995205" }
+    local vu93 = { 72555434288985, 91067294642442, 104124534923268 }
+    local vu94 = { 133094662049155, 134711731729986, 76963965406296, 92546791251633, 128188725134114, 109088632860488, 78339272602733, 127015697036075 }
+
+    function OnSpawn(_)
+        vu9:SendNotification("Info", "MUI Loaded.", 3)
+        local vu95 = GetNewCharacter()
+        if not vu95:WaitForChild("HumanoidRootPart") then
+            vu95:FindFirstChild("HumanoidRootPart")
+        end
+        vu95:WaitForChild("Humanoid")
+        vu95:WaitForChild("Torso")
+        vu95:WaitForChild("Right Arm")
+        vu95:SetAttribute("RealBlock", false)
+        vu95:SetAttribute("Character", "Goku")
+        task.spawn(function()
+            for _ = 0, 10 do
+                vu95:SetAttribute("UltimateName", string.upper("LIMIT BURST"))
+                task.wait(0.1)
+            end
+        end)
+        ReplaceAnimations({
+            ["rbxassetid://10470389827"] = { Kill = true },
+            ["rbxassetid://10473655645"] = { Kill = true },
+            ["rbxassetid://10473653782"] = { Kill = true },
+            ["rbxassetid://10473655082"] = { Kill = true },
+            ["rbxassetid://13380778193"] = { Kill = true }
+        })
+        vu95:GetAttributeChangedSignal("Blocking"):Connect(function()
+            task.wait()
+            if vu95:GetAttribute("Blocking", true) then
+                vu95:SetAttribute("RealBlock", true)
+                vu95:SetAttribute("Blocking", false)
+            end
+        end)
+        repeat
+            task.wait()
+            Block(true)
+            local v96 = vu95
+        until vu95.GetAttribute(v96, "RealBlock", true)
+        WaitForAttribute(vu95, "Blocking", 10)
+        local vu97 = {}
+        local function vu100(pu98)
+            local v99 = pu98 == "LastM1Fire" and 0.8 or 0.4
+            if vu97[pu98] then
+                vu97[pu98]:Disconnect()
+                vu97[pu98] = nil
+            end
+            vu95:SetAttribute("RealBlock", false)
+            vu97[pu98] = task.delay(v99, function()
+                repeat
+                    task.wait()
+                    Block(true)
+                until vu95:GetAttribute("RealBlock", true)
+                vu97[pu98] = nil
+            end)
+        end
+        local function v102(pu101)
+            vu95:GetAttributeChangedSignal(pu101):Connect(function()
+                vu100(pu101)
+            end)
+        end
+        v102("LastM1Fire")
+        v102("LastDashSwing")
+        v102("LastSkill")
+        v102("_LastDash")
+        v102("LastDamage")
+        local vu103 = 0
+        local vu104 = nil
+        local vu105 = 1
+        local function vu106()
+            if vu104 and vu104.IsPlaying then
+                vu104:Stop()
+            end
+            vu104 = PlayAnimation(vu94[vu105])
+            vu105 = vu105 + 1
+            if vu105 > # vu94 then
+                vu105 = 1
+            end
+            FireSound(1, vu93[math.random(1, # vu93)])
+        end
+        local v107 = vu95
+        vu95.GetAttributeChangedSignal(v107, "BlockReact"):Connect(function()
+            local v108 = vu95
+            local v109 = math.abs(v108:GetAttribute("BlockReact"))
+            if vu103 < v109 or math.abs(v109 - vu103) > 1 then
+                vu106()
+            end
+            vu103 = v109
+        end)
+        local vu110 = AccessoryBind("Emote")
+        PlayAnimation("116187503451999")
+        FireSignal({
+            AnimSent = 116187503451999,
+            Character = vu95,
+            SpecificModule = vu3.Emotes.VFX,
+            RealBind = vu110,
+            vfxName = "Divine Form",
+            Type = "ReplicateEmoteVfx"
+        })
+        task.delay(7.21, function()
+            if vu110 and vu110.Parent and workspace.Live:FindFirstChild(tostring(vu95)) then
+                -- Se eliminó la parte que cargaba MUI.mp3 localmente
+                local vu112 = vu3.Emotes.VFX.VfxMods.Evolved.vfx.Folder
+                local vu113 = Instance.new("Folder")
+                vu113.Name = "AuraHolder"
+                local v114 = vu113
+                vu113.SetAttribute(v114, "DivineForm", true)
+                local v115 = vu113
+                vu113.SetAttribute(v115, "LimAura", true)
+                vu113.Parent = vu95
+                task.spawn(function()
+                    local v116 = vu112
+                    local v117, v118, v119 = pairs(v116:GetChildren())
+                    while true do
+                        local v120
+                        v119, v120 = v117(v118, v119)
+                        if v119 == nil then break end
+                        if v120:IsA("BasePart") then
+                            local v121 = vu95:FindFirstChild(v120.Name)
+                            if v121 then
+                                local v122 = v120:Clone()
+                                v122:SetAttribute("LimAura", true)
+                                v122.Transparency = 1
+                                v122.Massless = true
+                                v122.Name = tostring(math.random(1, 1000))
+                                local v123 = Instance.new("Weld")
+                                v123.Part0 = v121
+                                v123.Part1 = v122
+                                v123.Parent = v122
+                                v122.Parent = vu113
+                                local v124, v125, v126 = pairs(v122:GetDescendants())
+                                while true do
+                                    local v127
+                                    v126, v127 = v124(v125, v126)
+                                    if v126 == nil then break end
+                                    if v127:IsA("ParticleEmitter") or v127:IsA("Beam") then
+                                        v127:SetAttribute("LimitedAura", true)
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end)
+            end
+        end)
+        vu95.DescendantAdded:Connect(function(p128)
+            if p128:IsA("Sound") and table.find(vu92, p128.SoundId) then
+                vu4.Heartbeat:Wait()
+                p128:Destroy()
+            end
+        end)
+    end
+
+    if vu1.Character then
+        task.spawn(function()
+            OnSpawn(vu82:GetAttribute("Character") or "None")
+        end)
+    end
+    vu1.CharacterAdded:Connect(function(_)
+        task.spawn(function()
+            OnSpawn(vu82:GetAttribute("Character") or "None")
+        end)
+    end)
+else
+    vu9:SendNotification("Error", "Script has expired!", 3)
+end
